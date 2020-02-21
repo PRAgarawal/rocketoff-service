@@ -1,4 +1,4 @@
-## RocketOff
+## RocketOff... For when people need to knock it off
 This highly utilitarian service has two endpoints that can be invoked via slack commands. The command to use depends on what type of behavior needs to be stopped.
 
 - `POST /show_em_the_beard` will reply with a gif reminding relevant members of the channel or DM that they are lame and should move on:
