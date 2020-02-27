@@ -19,7 +19,7 @@ func MakeServerEndpoints(s Service) Endpoints {
 }
 
 func makeShowEmTheBeardEndpoint(svc Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
+	return func(ctx context.Context, _ interface{}) (interface{}, error) {
 		imgReply, err := svc.ShowEmTheBeard(ctx)
 		if err != nil {
 			return nil, err
@@ -29,7 +29,7 @@ func makeShowEmTheBeardEndpoint(svc Service) endpoint.Endpoint {
 }
 
 func makeShowEmThePointGodEndpoint(svc Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
+	return func(ctx context.Context, _ interface{}) (interface{}, error) {
 		imgReply, err := svc.ShowEmThePointGod(ctx)
 		if err != nil {
 			return nil, err

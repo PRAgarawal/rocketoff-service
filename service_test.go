@@ -9,13 +9,19 @@ import (
 )
 
 func TestShowEmTheBeard(t *testing.T) {
-	svc := New(kitlog.NewNopLogger(), nil)
+	svc := New(kitlog.NewNopLogger())
+	imgReply, err := svc.ShowEmTheBeard(context.Background())
+	expected := &ImageReply{ImageURL:theBeardGif}
 
-	assert.NoError(t, svc.ShowEmTheBeard(context.Background()))
+	assert.NoError(t, err)
+	assert.Equal(t, expected, imgReply)
 }
 
 func TestShowEmThePointGod(t *testing.T) {
-	svc := New(kitlog.NewNopLogger(), nil)
+	svc := New(kitlog.NewNopLogger())
+	imgReply, err := svc.ShowEmThePointGod(context.Background())
+	expected := &ImageReply{ImageURL:thePointGodGif}
 
-	assert.NoError(t, svc.ShowEmThePointGod(context.Background()))
+	assert.NoError(t, err)
+	assert.Equal(t, expected, imgReply)
 }

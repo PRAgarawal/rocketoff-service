@@ -1,7 +1,7 @@
 package rocketoff
 
 import (
-	"context"
+	"github.com/nlopes/slack"
 	"net/http"
 	"testing"
 
@@ -11,21 +11,40 @@ import (
 func TestMakeHTTPHandler(t *testing.T) {
 	e := Endpoints{}
 
-	result := MakeHTTPHandler(e)
+	result := MakeHTTPHandler(e, "")
 	assert.Implements(t, (*http.Handler)(nil), result)
 }
 
-func TestEncodeShowEmTheBeardResponse(t *testing.T) {
-	t.Run("valid request", func(t *testing.T) {
-		err := encodeShowEmTheBeardResponse(context.Background(), nil, nil)
-		assert.Nil(t, err)
-	})
+func TestSlashCommandRequestDecoder(t *testing.T) {
+	//TODO
+	t.Error("unimplemented")
 }
 
-func TestDecodeShowEmTheBeardRequest(t *testing.T) {
-	t.Run("valid request", func(t *testing.T) {
-		decodedRequest, err := decodeShowEmTheBeardRequest(context.Background(), nil)
+func TestEncodeResponse(t *testing.T) {
+	//TODO
+	t.Error("unimplemented")
+}
+
+func TestBuildSlackMsg(t *testing.T) {
+	t.Run("happy path", func(t *testing.T) {
+		resp := &commandResponse{imageUrl: theBeardGif}
+		msg, err := buildSlackMsg(resp)
+		expected := &slack.Msg{
+			ResponseType: slack.ResponseTypeInChannel,
+			Attachments: []slack.Attachment{
+				{
+					ImageURL: theBeardGif,
+				},
+			},
+		}
+
 		assert.Nil(t, err)
-		assert.Nil(t, decodedRequest)
+		assert.Equal(t, expected, msg)
+	})
+
+	t.Run("happy path", func(t *testing.T) {
+		_, err := buildSlackMsg(nil)
+
+		assert.Equal(t, ErrInvalidType{"commandResponse"}, err)
 	})
 }
