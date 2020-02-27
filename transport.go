@@ -13,7 +13,6 @@ import (
 )
 
 // MakeHTTPHandler initializes all the available http routes
-// TODO: This layer is very slack-specific right now. Can a different transport implementation handle this functionality for a different chat apps (keybase?) given the same Service interface and Endpoint layer?
 func MakeHTTPHandler(e Endpoints, signingSecret string) http.Handler {
 	router := mux.NewRouter()
 	opts := []kithttp.ServerOption{
@@ -46,7 +45,7 @@ func makeSlashCommandRequestDecoder(signingSecret string) kithttp.DecodeRequestF
 		}
 
 		r.Body = ioutil.NopCloser(io.TeeReader(r.Body, &verifier))
-		_, err = slack.SlashCommandParse(r)
+		command, err := slack.SlashCommandParse(r)
 		if err != nil {
 			return nil, err
 		}
@@ -55,43 +54,15 @@ func makeSlashCommandRequestDecoder(signingSecret string) kithttp.DecodeRequestF
 			return nil, err
 		}
 
-		return nil, nil
+		return &commandRequest{
+			responseURL:        command.ResponseURL,
+			requestingUsername: command.UserName,
+		}, nil
 	}
 }
 
-func encodeResponse(_ context.Context, w http.ResponseWriter, resp interface{}) error {
-	msg, err := buildSlackMsg(resp)
-	if err != nil {
-		return err
-	}
-
-	bytes, err := json.Marshal(msg)
-	if err != nil {
-		return err
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	if _, err = w.Write(bytes); err != nil {
-		return err
-	}
-
+func encodeResponse(_ context.Context, _ http.ResponseWriter, _ interface{}) error {
 	return nil
-}
-
-// buildSlackMsg takes a commandResponse interface from the endpoint layer, and builds a slack.Msg struct that can be written to an http.ResponseWriter. It returns an error if the resp is not of the proper type.
-func buildSlackMsg(resp interface{}) (*slack.Msg, error) {
-	cmdResponse, ok := resp.(*commandResponse)
-	if !ok {
-		return nil, ErrInvalidType{"commandResponse"}
-	}
-	return &slack.Msg{
-		ResponseType: slack.ResponseTypeInChannel,
-		Attachments: []slack.Attachment{
-			{
-				ImageURL: cmdResponse.imageUrl,
-			},
-		},
-	}, nil
 }
 
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {

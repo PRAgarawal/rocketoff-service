@@ -63,13 +63,22 @@ func TestMakeServerEndpoints(t *testing.T) {
 func TestShowEmTheBearEndpoint(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockSvc := new(mockService)
-		mockSvc.On("ShowEmTheBeard", mock.Anything).Return(&ImageReply{theBeardGif}, nil)
+		mockSvc.On("ShowEmTheBeard", mock.Anything).Return(nil)
 		endpoint := makeShowEmTheBeardEndpoint(mockSvc)
-		expected := &commandResponse{theBeardGif}
-		response, err := endpoint(context.Background(), nil)
+		response, err := endpoint(context.Background(), &commandRequest{})
 
 		assert.Nil(t, err)
-		assert.Equal(t, expected, response)
+		assert.Nil(t, response)
+	})
+
+	t.Run("invalid type", func(t *testing.T) {
+		mockSvc := new(mockService)
+		mockSvc.On("ShowEmTheBeard", mock.Anything).Return(nil)
+		endpoint := makeShowEmTheBeardEndpoint(mockSvc)
+		response, err := endpoint(context.Background(), "blah")
+
+		assert.Equal(t, ErrInvalidType{"commandRequest"}, err)
+		assert.Nil(t, response)
 	})
 
 	t.Run("error response", func(t *testing.T) {
@@ -86,13 +95,22 @@ func TestShowEmTheBearEndpoint(t *testing.T) {
 func TestShowEmThePointGodEndpoint(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockSvc := new(mockService)
-		mockSvc.On("ShowEmThePointGod", mock.Anything).Return(&ImageReply{thePointGodGif}, nil)
+		mockSvc.On("ShowEmThePointGod", mock.Anything).Return(nil)
 		endpoint := makeShowEmThePointGodEndpoint(mockSvc)
-		expected := &commandResponse{thePointGodGif}
-		response, err := endpoint(context.Background(), nil)
+		response, err := endpoint(context.Background(), &commandRequest{})
 
 		assert.Nil(t, err)
-		assert.Equal(t, expected, response)
+		assert.Nil(t, response)
+	})
+
+	t.Run("invalid type", func(t *testing.T) {
+		mockSvc := new(mockService)
+		mockSvc.On("ShowEmTheBeard", mock.Anything).Return(nil)
+		endpoint := makeShowEmThePointGodEndpoint(mockSvc)
+		response, err := endpoint(context.Background(), "blah")
+
+		assert.Equal(t, ErrInvalidType{"commandRequest"}, err)
+		assert.Nil(t, response)
 	})
 
 	t.Run("error response", func(t *testing.T) {
@@ -110,14 +128,12 @@ type mockService struct {
 	mock.Mock
 }
 
-func (m *mockService) ShowEmTheBeard(_ context.Context)  (*ImageReply, error) {
-	args := m.Called()
-	imgReply, _ := args.Get(0).(*ImageReply)
-	return imgReply, args.Error(1)
+func (m *mockService) ShowEmTheBeard(_ context.Context, command *ImageCommand) error {
+	args := m.Called(command)
+	return args.Error(0)
 }
 
-func (m *mockService) ShowEmThePointGod(_ context.Context)  (*ImageReply, error) {
-	args := m.Called()
-	imgReply, _ := args.Get(0).(*ImageReply)
-	return imgReply, args.Error(1)
+func (m *mockService) ShowEmThePointGod(_ context.Context, command *ImageCommand) error {
+	args := m.Called(command)
+	return args.Error(0)
 }

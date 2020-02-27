@@ -2,6 +2,7 @@ package rocketoff
 
 import (
 	"context"
+
 	"github.com/go-kit/kit/endpoint"
 )
 
@@ -19,25 +20,32 @@ func MakeServerEndpoints(s Service) Endpoints {
 }
 
 func makeShowEmTheBeardEndpoint(svc Service) endpoint.Endpoint {
-	return func(ctx context.Context, _ interface{}) (interface{}, error) {
-		imgReply, err := svc.ShowEmTheBeard(ctx)
-		if err != nil {
-			return nil, err
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		command, ok := request.(*commandRequest)
+		if !ok {
+			return nil, ErrInvalidType{"commandRequest"}
 		}
-		return &commandResponse{imgReply.ImageURL}, nil
+		return nil, svc.ShowEmTheBeard(ctx, &ImageCommand{
+			ResponseURL:        command.responseURL,
+			RequestingUsername: command.requestingUsername,
+		})
 	}
 }
 
 func makeShowEmThePointGodEndpoint(svc Service) endpoint.Endpoint {
-	return func(ctx context.Context, _ interface{}) (interface{}, error) {
-		imgReply, err := svc.ShowEmThePointGod(ctx)
-		if err != nil {
-			return nil, err
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		command, ok := request.(*commandRequest)
+		if !ok {
+			return nil, ErrInvalidType{"commandRequest"}
 		}
-		return &commandResponse{imgReply.ImageURL}, nil
+		return nil, svc.ShowEmThePointGod(ctx, &ImageCommand{
+			ResponseURL:        command.responseURL,
+			RequestingUsername: command.requestingUsername,
+		})
 	}
 }
 
-type commandResponse struct {
-	imageUrl string
+type commandRequest struct {
+	responseURL        string
+	requestingUsername string
 }
