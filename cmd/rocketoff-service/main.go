@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"net/http"
 	"os"
@@ -14,14 +15,16 @@ import (
 )
 
 func main() {
+	var (
+		signingSecret = flag.String("slack-signing-secret", os.Getenv("SLACK_SIGNING_SECRET"), "slack application signing secret to verify web requests")
+	)
 	logger := kitlog.With(kitlog.NewJSONLogger(os.Stderr), "ts", kitlog.DefaultTimestampUTC)
-	rocketoffService := rocketoff.New(logger, nil)
+	rocketoffService := rocketoff.New(logger)
 	integrationEndpoints := rocketoff.MakeServerEndpoints(rocketoffService)
 
 	mux := http.NewServeMux()
-	mux.Handle("/", rocketoff.MakeHTTPHandler(integrationEndpoints))
+	mux.Handle("/", rocketoff.MakeHTTPHandler(integrationEndpoints, *signingSecret))
 
-	// start the HTTP server
 	server := &http.Server{Addr: ":8080", Handler: mux}
 	listenAndServeGracefully(server, logger)
 }
@@ -72,12 +75,4 @@ func listenAndServeGracefully(server *http.Server, logger kitlog.Logger) {
 	}
 
 	<-idleConnsClosed
-}
-
-func envString(env, fallback string) string {
-	e := os.Getenv(env)
-	if e == "" {
-		return fallback
-	}
-	return e
 }

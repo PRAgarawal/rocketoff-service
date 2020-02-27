@@ -2,7 +2,6 @@ package rocketoff
 
 import (
 	"context"
-
 	"github.com/go-kit/kit/endpoint"
 )
 
@@ -14,27 +13,31 @@ type Endpoints struct {
 // MakeServerEndpoints initializes the endpoints for the service
 func MakeServerEndpoints(s Service) Endpoints {
 	return Endpoints{
-		ShowEmThePointGod: makeShowEmThePointGodEndpoint(s),
 		ShowEmTheBeard:    makeShowEmTheBeardEndpoint(s),
-	}
-}
-
-func makeShowEmThePointGodEndpoint(svc Service) endpoint.Endpoint {
-	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		err := svc.ShowEmThePointGod(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return nil, nil
+		ShowEmThePointGod: makeShowEmThePointGodEndpoint(s),
 	}
 }
 
 func makeShowEmTheBeardEndpoint(svc Service) endpoint.Endpoint {
 	return func(ctx context.Context, request interface{}) (interface{}, error) {
-		err := svc.ShowEmTheBeard(ctx)
+		imgReply, err := svc.ShowEmTheBeard(ctx)
 		if err != nil {
 			return nil, err
 		}
-		return nil, nil
+		return &commandResponse{imgReply.ImageURL}, nil
 	}
+}
+
+func makeShowEmThePointGodEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		imgReply, err := svc.ShowEmThePointGod(ctx)
+		if err != nil {
+			return nil, err
+		}
+		return &commandResponse{imgReply.ImageURL}, nil
+	}
+}
+
+type commandResponse struct {
+	imageUrl string
 }
