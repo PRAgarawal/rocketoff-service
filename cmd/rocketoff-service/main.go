@@ -11,19 +11,22 @@ import (
 	"time"
 
 	"github.com/PRAgarawal/rocketoff"
+	"github.com/PRAgarawal/rocketoff/chat/slack"
 	kitlog "github.com/go-kit/kit/log"
 )
 
 func main() {
 	var (
 		signingSecret = flag.String("slack-signing-secret", os.Getenv("SLACK_SIGNING_SECRET"), "slack application signing secret to verify web requests")
+		//TODO: Implement for keybase, and select the chat application via a flag?
 	)
 	logger := kitlog.With(kitlog.NewJSONLogger(os.Stderr), "ts", kitlog.DefaultTimestampUTC)
-	rocketoffService := rocketoff.New(logger)
+	rocketoffService := rocketoff.New(logger, slack.NewMessenger())
 	integrationEndpoints := rocketoff.MakeServerEndpoints(rocketoffService)
 
 	mux := http.NewServeMux()
-	mux.Handle("/", rocketoff.MakeHTTPHandler(integrationEndpoints, *signingSecret))
+	commandDecoder := slack.NewCommandDecoder(*signingSecret)
+	mux.Handle("/", rocketoff.MakeHTTPHandler(integrationEndpoints, commandDecoder))
 
 	server := &http.Server{Addr: ":8080", Handler: mux}
 	listenAndServeGracefully(server, logger)

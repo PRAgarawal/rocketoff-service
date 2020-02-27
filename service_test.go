@@ -2,66 +2,85 @@ package rocketoff
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"net/http/httptest"
 	"testing"
 
+	"github.com/PRAgarawal/rocketoff/chat"
 	kitlog "github.com/go-kit/kit/log"
-	"github.com/nlopes/slack"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 const (
-	testUser = "Rudy T"
+	testWebhook = "https://clutchCITY.net"
+	testUser    = "Rudy T"
 )
 
 func TestShowEmTheBeard(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		ts := httptest.NewServer(makeHandlerFunc(theBeardGif, t))
-		svc := New(kitlog.NewNopLogger())
-		command := &ImageCommand{
-			ResponseURL:        ts.URL,
-			RequestingUsername: testUser,
+		msgr := &mockMessenger{}
+		svc := New(kitlog.NewNopLogger(), msgr)
+		shouldAccept := &chat.CommandReply{
+			WebhookURL:         testWebhook,
+			RequestingUserName: testUser,
+			ImageURL: theBeardGif,
 		}
-		err := svc.ShowEmTheBeard(context.Background(), command)
+		msgr.On("SendImageReply", shouldAccept).Return(nil)
+		command := &ImageCommand{
+			WebhookURL:         testWebhook,
+			RequestingUserName: testUser,
+		}
 
-		assert.NoError(t, err)
+		assert.NoError(t, svc.ShowEmTheBeard(context.Background(), command))
+	})
+
+	t.Run("messenger error", func(t *testing.T) {
+		msgr := &mockMessenger{}
+		svc := New(kitlog.NewNopLogger(), msgr)
+		msgr.On("SendImageReply", mock.Anything).Return(fmt.Errorf("A BASIC ASS CASUAL POSTED A YOUTUBE CLIP TO PROVE HARDEN PLAYS NO DEFENSE AND FLOPS"))
+		err := svc.ShowEmTheBeard(context.Background(), &ImageCommand{})
+
+		if assert.Error(t, err) {
+			assert.Contains(t, err.Error(), "BASIC ASS")
+		}
 	})
 }
 
 func TestShowEmThePointGod(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
-		ts := httptest.NewServer(makeHandlerFunc(thePointGodGif, t))
-		svc := New(kitlog.NewNopLogger())
-		command := &ImageCommand{
-			ResponseURL:        ts.URL,
-			RequestingUsername: testUser,
+		msgr := &mockMessenger{}
+		svc := New(kitlog.NewNopLogger(), msgr)
+		shouldAccept := &chat.CommandReply{
+			WebhookURL:         testWebhook,
+			RequestingUserName: testUser,
+			ImageURL: thePointGodGif,
 		}
-		err := svc.ShowEmThePointGod(context.Background(), command)
+		msgr.On("SendImageReply", shouldAccept).Return(nil)
+		command := &ImageCommand{
+			WebhookURL:         testWebhook,
+			RequestingUserName: testUser,
+		}
 
-		assert.NoError(t, err)
+		assert.NoError(t, svc.ShowEmThePointGod(context.Background(), command))
+	})
+
+	t.Run("messenger error", func(t *testing.T) {
+		msgr := &mockMessenger{}
+		svc := New(kitlog.NewNopLogger(), msgr)
+		msgr.On("SendImageReply", mock.Anything).Return(fmt.Errorf("OH GOD WESTBROOK IS OPEN FROM 18 FEET"))
+		err := svc.ShowEmThePointGod(context.Background(), &ImageCommand{})
+
+		if assert.Error(t, err) {
+			assert.Contains(t, err.Error(), "WESTBROOK IS OPEN")
+		}
 	})
 }
 
-func makeHandlerFunc(imageURL string, t *testing.T) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		headerContentType := r.Header.Get("Content-Type")
-		assert.Equal(t, "application/json", headerContentType)
-		body, err := ioutil.ReadAll(r.Body)
-		assert.Nil(t, err, "Failed reading request body")
-		expected := &slack.Msg{
-			Text:         fmt.Sprintf("with warm regards from %s", testUser),
-			ResponseType: slack.ResponseTypeInChannel,
-			Attachments: []slack.Attachment{
-				{
-					ImageURL: imageURL,
-				},
-			},
-		}
-		expectedRaw, _ := json.Marshal(expected)
-		assert.Equal(t, expectedRaw, body)
-	}
+type mockMessenger struct {
+	mock.Mock
+}
+
+func (m *mockMessenger) SendImageReply(reply *chat.CommandReply) error {
+	args := m.Called(reply)
+	return args.Error(0)
 }

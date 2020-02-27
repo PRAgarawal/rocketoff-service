@@ -1,20 +1,27 @@
 package rocketoff
 
 import (
+	"context"
 	"net/http"
 	"testing"
 
+	"github.com/PRAgarawal/rocketoff/chat"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestMakeHTTPHandler(t *testing.T) {
 	e := Endpoints{}
 
-	result := MakeHTTPHandler(e, "")
+	result := MakeHTTPHandler(e, &mockCommandDecoder{})
 	assert.Implements(t, (*http.Handler)(nil), result)
 }
 
-func TestSlashCommandRequestDecoder(t *testing.T) {
-	//TODO
-	t.Error("unimplemented")
+type mockCommandDecoder struct {
+	mock.Mock
+}
+
+func (m *mockCommandDecoder) DecodeCommand(_ context.Context, request *http.Request) (*chat.Command, error) {
+	args := m.Called(request)
+	return args.Get(0).(*chat.Command), args.Error(1)
 }

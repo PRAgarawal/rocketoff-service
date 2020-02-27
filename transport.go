@@ -3,22 +3,20 @@ package rocketoff
 import (
 	"context"
 	"encoding/json"
-	"io"
-	"io/ioutil"
 	"net/http"
 
+	"github.com/PRAgarawal/rocketoff/chat"
 	kithttp "github.com/go-kit/kit/transport/http"
 	"github.com/gorilla/mux"
-	"github.com/nlopes/slack"
 )
 
 // MakeHTTPHandler initializes all the available http routes
-func MakeHTTPHandler(e Endpoints, signingSecret string) http.Handler {
+func MakeHTTPHandler(e Endpoints, commandDecoder chat.CommandDecoder) http.Handler {
 	router := mux.NewRouter()
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorEncoder(encodeError),
 	}
-	decodeSlashCommandRequest := makeSlashCommandRequestDecoder(signingSecret)
+	decodeSlashCommandRequest := makeSlashCommandRequestDecoder(commandDecoder)
 	router.Methods(http.MethodPost).Path("/show_em_the_beard/").
 		Handler(kithttp.NewServer(
 			e.ShowEmTheBeard,
@@ -37,26 +35,16 @@ func MakeHTTPHandler(e Endpoints, signingSecret string) http.Handler {
 	return router
 }
 
-func makeSlashCommandRequestDecoder(signingSecret string) kithttp.DecodeRequestFunc {
-	return func(_ context.Context, r *http.Request) (interface{}, error) {
-		verifier, err := slack.NewSecretsVerifier(r.Header, signingSecret)
+func makeSlashCommandRequestDecoder(commandDecoder chat.CommandDecoder) kithttp.DecodeRequestFunc {
+	return func(ctx context.Context, request *http.Request) (interface{}, error) {
+		command, err := commandDecoder.DecodeCommand(ctx, request)
 		if err != nil {
-			return nil, err
-		}
-
-		r.Body = ioutil.NopCloser(io.TeeReader(r.Body, &verifier))
-		command, err := slack.SlashCommandParse(r)
-		if err != nil {
-			return nil, err
-		}
-
-		if err = verifier.Ensure(); err != nil {
 			return nil, err
 		}
 
 		return &commandRequest{
-			responseURL:        command.ResponseURL,
-			requestingUsername: command.UserName,
+			webhookURL:         command.WebhookURL,
+			requestingUsername: command.RequestingUserName,
 		}, nil
 	}
 }
