@@ -7,17 +7,17 @@ import (
 )
 
 type Endpoints struct {
-	ShowEmThePointGod endpoint.Endpoint
-	ShowEmTheBeard    endpoint.Endpoint
-	OAuthComplete     endpoint.Endpoint
+	ShowEmThePointGod  endpoint.Endpoint
+	ShowEmTheBeard     endpoint.Endpoint
+	SlackOAuthComplete endpoint.Endpoint
 }
 
 // MakeServerEndpoints initializes the endpoints for the service
 func MakeServerEndpoints(s Service) Endpoints {
 	return Endpoints{
-		ShowEmTheBeard:    makeShowEmTheBeardEndpoint(s),
-		ShowEmThePointGod: makeShowEmThePointGodEndpoint(s),
-		OAuthComplete:     makeOAuthCompleteEndpoint(s),
+		ShowEmTheBeard:     makeShowEmTheBeardEndpoint(s),
+		ShowEmThePointGod:  makeShowEmThePointGodEndpoint(s),
+		SlackOAuthComplete: makeOAuthCompleteEndpoint(s),
 	}
 }
 
@@ -47,7 +47,7 @@ func makeShowEmThePointGodEndpoint(svc Service) endpoint.Endpoint {
 	}
 }
 
-func makeOAuthCompleteEndpoint(svc Service) endpoint.Endpoint {
+func makeOAuthCompleteEndpoint(_ Service) endpoint.Endpoint {
 	return func(_ context.Context, _ interface{}) (interface{}, error) {
 		return nil, nil
 	}

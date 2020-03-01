@@ -38,7 +38,7 @@ func MakeHTTPHandler(e Endpoints, commandDecoder chat.CommandDecoder) http.Handl
 
 	router.Methods(http.MethodGet).Path("/slack_oauth_complete/").
 		Handler(kithttp.NewServer(
-			e.OAuthComplete,
+			e.SlackOAuthComplete,
 			decodeSlackOAuthCompleteRequest,
 			encodeSlackOAuthCompleteResponse,
 			opts...,
