@@ -6,8 +6,14 @@ type Messenger interface {
 	SendImageReply(reply *CommandReply) error
 }
 
+// CommandReply is all data that a chat application potentially needs in order to reply to a command.
 type CommandReply struct {
-	RequestingUserName string
-	WebhookURL         string
-	ImageURL           string
+	// RequestingUserID is the chat app's unique ID for the user we will reply to
+	RequestingUserID string
+
+	// WebhookURL is the ephemeral URL created for this command interaction on the given chat application
+	WebhookURL       string
+
+	// ImageURL is the URL of the image to reply with, if this is an image reply.
+	ImageURL         string
 }

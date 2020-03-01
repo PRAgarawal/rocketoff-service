@@ -26,7 +26,7 @@ func TestSendImageReply(t *testing.T) {
 			body, err := ioutil.ReadAll(r.Body)
 			assert.Nil(t, err, "Failed reading request body")
 			expected := &slack.Msg{
-				Text:         fmt.Sprintf("with warm regards from %s", testUser),
+				Text:         fmt.Sprintf("with warm regards from <@%s>", testUser),
 				ResponseType: slack.ResponseTypeInChannel,
 				Attachments: []slack.Attachment{
 					{
@@ -39,9 +39,9 @@ func TestSendImageReply(t *testing.T) {
 		}))
 
 		reply := &chat.CommandReply{
-			RequestingUserName: testUser,
-			WebhookURL:         ts.URL,
-			ImageURL:           testImage,
+			RequestingUserID: testUser,
+			WebhookURL:       ts.URL,
+			ImageURL:         testImage,
 		}
 		msgr := NewMessenger()
 

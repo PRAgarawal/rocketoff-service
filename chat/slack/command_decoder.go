@@ -36,7 +36,7 @@ func (cd *CommandDecoder) DecodeCommand(_ context.Context, request *http.Request
 	}
 
 	return &chat.Command{
-		WebhookURL:         command.ResponseURL,
-		RequestingUserName: command.UserName,
+		WebhookURL:       command.ResponseURL,
+		RequestingUserID: command.UserID,
 	}, nil
 }

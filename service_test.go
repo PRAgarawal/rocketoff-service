@@ -21,14 +21,14 @@ func TestShowEmTheBeard(t *testing.T) {
 		msgr := &mockMessenger{}
 		svc := New(kitlog.NewNopLogger(), msgr)
 		shouldAccept := &chat.CommandReply{
-			WebhookURL:         testWebhook,
-			RequestingUserName: testUser,
-			ImageURL: theBeardGif,
+			WebhookURL:       testWebhook,
+			RequestingUserID: testUser,
+			ImageURL:         theBeardGif,
 		}
 		msgr.On("SendImageReply", shouldAccept).Return(nil)
 		command := &ImageCommand{
-			WebhookURL:         testWebhook,
-			RequestingUserName: testUser,
+			WebhookURL:       testWebhook,
+			RequestingUserID: testUser,
 		}
 
 		assert.NoError(t, svc.ShowEmTheBeard(context.Background(), command))
@@ -51,14 +51,14 @@ func TestShowEmThePointGod(t *testing.T) {
 		msgr := &mockMessenger{}
 		svc := New(kitlog.NewNopLogger(), msgr)
 		shouldAccept := &chat.CommandReply{
-			WebhookURL:         testWebhook,
-			RequestingUserName: testUser,
-			ImageURL: thePointGodGif,
+			WebhookURL:       testWebhook,
+			RequestingUserID: testUser,
+			ImageURL:         thePointGodGif,
 		}
 		msgr.On("SendImageReply", shouldAccept).Return(nil)
 		command := &ImageCommand{
-			WebhookURL:         testWebhook,
-			RequestingUserName: testUser,
+			WebhookURL:       testWebhook,
+			RequestingUserID: testUser,
 		}
 
 		assert.NoError(t, svc.ShowEmThePointGod(context.Background(), command))

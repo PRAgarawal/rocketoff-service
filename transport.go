@@ -43,8 +43,8 @@ func makeSlashCommandRequestDecoder(commandDecoder chat.CommandDecoder) kithttp.
 		}
 
 		return &commandRequest{
-			webhookURL:         command.WebhookURL,
-			requestingUsername: command.RequestingUserName,
+			webhookURL:       command.WebhookURL,
+			requestingUserID: command.RequestingUserID,
 		}, nil
 	}
 }

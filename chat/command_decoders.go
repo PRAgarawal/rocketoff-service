@@ -11,7 +11,11 @@ type CommandDecoder interface {
 	DecodeCommand(ctx context.Context, r *http.Request) (*Command, error)
 }
 
+// Command is all the relevant data we need from a command a chat user has issued
 type Command struct {
-	WebhookURL string
-	RequestingUserName string
+	// WebhookURL is the ephemeral URL created for this command interaction on the given chat application
+	WebhookURL       string
+
+	// RequestingUserID is the chat app's unique ID for the user we will reply to
+	RequestingUserID string
 }

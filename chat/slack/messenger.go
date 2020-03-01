@@ -38,7 +38,7 @@ func (sm *slackMessenger) SendImageReply(reply *chat.CommandReply) error {
 // slackMsg takes a commandResponse interface from the endpoint layer, and builds a slack.Msg struct that can be written to an http.ResponseWriter.
 func slackMsg(reply *chat.CommandReply) *slack.Msg {
 	return &slack.Msg{
-		Text:         fmt.Sprintf("with warm regards from %s", reply.RequestingUserName),
+		Text:         fmt.Sprintf("with warm regards from <@%s>", reply.RequestingUserID),
 		ResponseType: slack.ResponseTypeInChannel,
 		Attachments: []slack.Attachment{
 			{

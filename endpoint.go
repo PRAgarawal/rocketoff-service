@@ -26,8 +26,8 @@ func makeShowEmTheBeardEndpoint(svc Service) endpoint.Endpoint {
 			return nil, ErrInvalidType{"commandRequest"}
 		}
 		return nil, svc.ShowEmTheBeard(ctx, &ImageCommand{
-			WebhookURL:         command.webhookURL,
-			RequestingUserName: command.requestingUsername,
+			WebhookURL:       command.webhookURL,
+			RequestingUserID: command.requestingUserID,
 		})
 	}
 }
@@ -39,13 +39,13 @@ func makeShowEmThePointGodEndpoint(svc Service) endpoint.Endpoint {
 			return nil, ErrInvalidType{"commandRequest"}
 		}
 		return nil, svc.ShowEmThePointGod(ctx, &ImageCommand{
-			WebhookURL:         command.webhookURL,
-			RequestingUserName: command.requestingUsername,
+			WebhookURL:       command.webhookURL,
+			RequestingUserID: command.requestingUserID,
 		})
 	}
 }
 
 type commandRequest struct {
-	webhookURL         string
-	requestingUsername string
+	webhookURL       string
+	requestingUserID string
 }

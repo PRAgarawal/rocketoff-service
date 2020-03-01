@@ -25,8 +25,8 @@ type ImageCommand struct {
 	// WebhookURL specifies the (likely ephemeral) URL provided by the chat application to use when interacting with the commanding user. POSTing messages to this URL should send messages for some period of time.
 	WebhookURL         string
 
-	// RequestingUserName is the name of the chat app user who sent the command
-	RequestingUserName string
+	// RequestingUserID is the ID of the chat app user who sent the command
+	RequestingUserID string
 }
 
 type Svc struct {
@@ -43,9 +43,9 @@ func New(logger kitlog.Logger, msgr chat.Messenger) Service {
 
 func (s *Svc) ShowEmTheBeard(_ context.Context, command *ImageCommand) error {
 	reply := &chat.CommandReply{
-		RequestingUserName: command.RequestingUserName,
-		WebhookURL: command.WebhookURL,
-		ImageURL: theBeardGif,
+		RequestingUserID: command.RequestingUserID,
+		WebhookURL:       command.WebhookURL,
+		ImageURL:         theBeardGif,
 	}
 	if err := s.msgr.SendImageReply(reply); err != nil {
 		return err
@@ -61,9 +61,9 @@ func (s *Svc) ShowEmTheBeard(_ context.Context, command *ImageCommand) error {
 
 func (s *Svc) ShowEmThePointGod(_ context.Context, command *ImageCommand) error {
 	reply := &chat.CommandReply{
-		RequestingUserName: command.RequestingUserName,
-		WebhookURL: command.WebhookURL,
-		ImageURL: thePointGodGif,
+		RequestingUserID: command.RequestingUserID,
+		WebhookURL:       command.WebhookURL,
+		ImageURL:         thePointGodGif,
 	}
 	if err := s.msgr.SendImageReply(reply); err != nil {
 		return err
