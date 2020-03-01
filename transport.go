@@ -10,12 +10,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
-const (
-	slackOAuthURL = "https://slack.com/oauth/v2/authorize?client_id=292540839159.944358440549&scope=chat:write,commands"
-)
-
 // MakeHTTPHandler initializes all the available http routes
-func MakeHTTPHandler(e Endpoints, commandDecoder chat.CommandDecoder) http.Handler {
+func MakeHTTPHandler(e Endpoints, commandDecoder chat.CommandDecoder, oauthURL string) http.Handler {
 	router := mux.NewRouter()
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorEncoder(encodeError),
@@ -36,11 +32,12 @@ func MakeHTTPHandler(e Endpoints, commandDecoder chat.CommandDecoder) http.Handl
 			opts...,
 		))
 
-	router.Methods(http.MethodGet).Path("/slack_oauth_complete/").
+	encodeOAuthCompleteResponse := makeOAuthCompleteResponseEncoder(oauthURL)
+	router.Methods(http.MethodGet).Path("/oauth_complete/").
 		Handler(kithttp.NewServer(
-			e.SlackOAuthComplete,
-			decodeSlackOAuthCompleteRequest,
-			encodeSlackOAuthCompleteResponse,
+			e.OAuthComplete,
+			decodeOAuthCompleteRequest,
+			encodeOAuthCompleteResponse,
 			opts...,
 		))
 
@@ -65,14 +62,16 @@ func encodeResponse(_ context.Context, _ http.ResponseWriter, _ interface{}) err
 	return nil
 }
 
-func decodeSlackOAuthCompleteRequest(_ context.Context, _ *http.Request) (interface{}, error) {
+func decodeOAuthCompleteRequest(_ context.Context, _ *http.Request) (interface{}, error) {
 	return nil, nil
 }
 
-func encodeSlackOAuthCompleteResponse(_ context.Context, writer http.ResponseWriter, _ interface{}) error {
-	writer.Header().Set("Location", slackOAuthURL)
-	writer.WriteHeader(http.StatusFound)
-	return nil
+func makeOAuthCompleteResponseEncoder(oauthURL string) kithttp.EncodeResponseFunc {
+	return func(_ context.Context, writer http.ResponseWriter, _ interface{}) error {
+		writer.Header().Set("Location", oauthURL)
+		writer.WriteHeader(http.StatusFound)
+		return nil
+	}
 }
 
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {

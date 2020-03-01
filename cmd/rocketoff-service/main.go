@@ -15,9 +15,14 @@ import (
 	kitlog "github.com/go-kit/kit/log"
 )
 
+const (
+	slackOAuthURL = "https://slack.com/oauth/v2/authorize?client_id=%s&scope=chat:write,commands"
+)
+
 func main() {
 	var (
 		signingSecret = flag.String("slack-signing-secret", os.Getenv("SLACK_SIGNING_SECRET"), "slack application signing secret to verify web requests")
+		slackClientID = flag.String("slack-client-id", os.Getenv("SLACK_CLIENT_ID"), "slack application client ID for OAuth requests")
 		//TODO: Implement for keybase, and select the chat application via a flag?
 	)
 	logger := kitlog.With(kitlog.NewJSONLogger(os.Stderr), "ts", kitlog.DefaultTimestampUTC)
@@ -26,7 +31,8 @@ func main() {
 
 	mux := http.NewServeMux()
 	commandDecoder := slack.NewCommandDecoder(*signingSecret)
-	mux.Handle("/", rocketoff.MakeHTTPHandler(integrationEndpoints, commandDecoder))
+	slackOAuthCompleteURL := fmt.Sprintf(slackOAuthURL, *slackClientID)
+	mux.Handle("/", rocketoff.MakeHTTPHandler(integrationEndpoints, commandDecoder, slackOAuthCompleteURL))
 
 	server := &http.Server{Addr: ":8080", Handler: mux}
 	listenAndServeGracefully(server, logger)

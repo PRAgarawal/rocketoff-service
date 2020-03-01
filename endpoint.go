@@ -7,17 +7,17 @@ import (
 )
 
 type Endpoints struct {
-	ShowEmThePointGod  endpoint.Endpoint
-	ShowEmTheBeard     endpoint.Endpoint
-	SlackOAuthComplete endpoint.Endpoint
+	ShowEmThePointGod endpoint.Endpoint
+	ShowEmTheBeard    endpoint.Endpoint
+	OAuthComplete     endpoint.Endpoint
 }
 
 // MakeServerEndpoints initializes the endpoints for the service
 func MakeServerEndpoints(s Service) Endpoints {
 	return Endpoints{
-		ShowEmTheBeard:     makeShowEmTheBeardEndpoint(s),
-		ShowEmThePointGod:  makeShowEmThePointGodEndpoint(s),
-		SlackOAuthComplete: makeOAuthCompleteEndpoint(s),
+		ShowEmTheBeard:    makeShowEmTheBeardEndpoint(s),
+		ShowEmThePointGod: makeShowEmThePointGodEndpoint(s),
+		OAuthComplete:     makeOAuthCompleteEndpoint(s),
 	}
 }
 
