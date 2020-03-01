@@ -1,7 +1,9 @@
 ## RocketOff... For when people need to knock it off
-This highly utilitarian service has two endpoints that can be invoked via slack (for now, others soon, hopefully) commands. The command to use depends on what type of behavior needs to be stopped. See below for the available commands and sample usage gifs.
 
-### The Beard
+### Usage
+This highly utilitarian service has two endpoints that can be invoked via slack slash commands. The command to use depends on what type of teammate behavior you'd like correct. See below for the available commands and sample usage gifs.
+
+#### The Beard
 The following commands will invoke a reply with a gif reminding relevant members of the channel or DM that they are lame and should move on:
 - `/the-beard`
 - `/i'm-done`
@@ -9,7 +11,7 @@ The following commands will invoke a reply with a gif reminding relevant members
 ![](https://i.imgur.com/fksL6ee.gif)
 
 
-### The Point God
+#### The Point God
 The following commands will will invoke a reply with a gif reminding relevant members of the channel or DM that they are not funny and should probably stop trying to be:
 - `/point-god`
 - `/no-one-likes-you`
