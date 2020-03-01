@@ -1,0 +1,7 @@
+runtime: go113
+
+includes:
+  - env.yaml
+
+main: ./cmd/rocketoff-service
+
