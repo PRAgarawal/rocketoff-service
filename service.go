@@ -23,7 +23,7 @@ type Service interface {
 
 type ImageCommand struct {
 	// WebhookURL specifies the (likely ephemeral) URL provided by the chat application to use when interacting with the commanding user. POSTing messages to this URL should send messages for some period of time.
-	WebhookURL         string
+	WebhookURL string
 
 	// RequestingUserID is the ID of the chat app user who sent the command
 	RequestingUserID string
@@ -37,7 +37,7 @@ type Svc struct {
 func New(logger kitlog.Logger, msgr chat.Messenger) Service {
 	return &Svc{
 		logger: logger,
-		msgr: msgr,
+		msgr:   msgr,
 	}
 }
 

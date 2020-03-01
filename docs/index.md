@@ -1,4 +1,4 @@
-## RocketOff... The Slack App for when people need to knock it off
+## RocketOff... The App for Slack to use when people need to knock it off
 
 ### Usage
 This highly utilitarian service has two endpoints that can be invoked via slack slash commands. The command to use depends on what type of teammate behavior you'd like correct. See below for the available commands and sample usage gifs.
@@ -18,9 +18,14 @@ The following commands will will invoke a reply with a gif reminding relevant me
 
 ![](https://i.imgur.com/EeLpHJr.gif)
 
+### Get started!
 Some organizations have shown proper use of these commands to increase productivity by as much as 47% within six months*.
 
-\*It's true
+So what are you waiting for? Install the app today!
+
+<a href="https://slack.com/oauth/v2/authorize?client_id=292540839159.944358440549&scope=chat:write,commands"><img alt="Add to Slack" height="40" width="139" src="https://platform.slack-edge.com/img/add_to_slack.png" srcset="https://platform.slack-edge.com/img/add_to_slack.png 1x, https://platform.slack-edge.com/img/add_to_slack@2x.png 2x"></a>
+
+\*This is completely untrue
 
 ### Privacy Policy
 I don't store any of your data. Period. I couldn't if I wanted to. There is no data persistence in this application of any kind, and no organization or user-level authentication. The only data collected is whatever slack does on their end. See the source code if you'd like some reassurance.

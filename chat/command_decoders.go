@@ -14,7 +14,7 @@ type CommandDecoder interface {
 // Command is all the relevant data we need from a command a chat user has issued
 type Command struct {
 	// WebhookURL is the ephemeral URL created for this command interaction on the given chat application
-	WebhookURL       string
+	WebhookURL string
 
 	// RequestingUserID is the chat app's unique ID for the user we will reply to
 	RequestingUserID string

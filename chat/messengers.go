@@ -12,8 +12,8 @@ type CommandReply struct {
 	RequestingUserID string
 
 	// WebhookURL is the ephemeral URL created for this command interaction on the given chat application
-	WebhookURL       string
+	WebhookURL string
 
 	// ImageURL is the URL of the image to reply with, if this is an image reply.
-	ImageURL         string
+	ImageURL string
 }

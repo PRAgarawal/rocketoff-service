@@ -2,11 +2,12 @@ package slack
 
 import (
 	"context"
-	"github.com/PRAgarawal/rocketoff/chat"
-	"github.com/nlopes/slack"
 	"io"
 	"io/ioutil"
 	"net/http"
+
+	"github.com/PRAgarawal/rocketoff/chat"
+	"github.com/nlopes/slack"
 )
 
 type CommandDecoder struct {

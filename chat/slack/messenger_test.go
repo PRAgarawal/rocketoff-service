@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	testUser = "JVG"
+	testUser  = "JVG"
 	testImage = "T-Mac.jpg"
 )
 
