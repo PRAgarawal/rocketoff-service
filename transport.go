@@ -32,6 +32,14 @@ func MakeHTTPHandler(e Endpoints, commandDecoder chat.CommandDecoder) http.Handl
 			opts...,
 		))
 
+	router.Methods(http.MethodGet).Path("/oauth_complete/").
+		Handler(kithttp.NewServer(
+			e.OAuthComplete,
+			decodeOAuthCompleteRequest,
+			encodeOAuthCompleteResponse,
+			opts...,
+		))
+
 	return router
 }
 
@@ -50,6 +58,16 @@ func makeSlashCommandRequestDecoder(commandDecoder chat.CommandDecoder) kithttp.
 }
 
 func encodeResponse(_ context.Context, _ http.ResponseWriter, _ interface{}) error {
+	return nil
+}
+
+func decodeOAuthCompleteRequest(_ context.Context, _ *http.Request) (interface{}, error) {
+	return nil, nil
+}
+
+func encodeOAuthCompleteResponse(_ context.Context, writer http.ResponseWriter, _ interface{}) error {
+	writer.Header().Set("Location", "https://slack.com")
+	writer.WriteHeader(http.StatusFound)
 	return nil
 }
 
