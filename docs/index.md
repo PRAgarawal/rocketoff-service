@@ -1,7 +1,7 @@
 ## Welcome to RocketOff - The app for when people need to knock it off
 
 ### Usage
-This highly utilitarian service for slack has two endpoints that can be invoked via slack slash commands. The command to use depends on what type of teammate behavior you'd like correct. See below for the available commands and sample usage https://rocketoff.appspot.com/oauth_complete/s.
+This highly utilitarian service for slack has two endpoints that can be invoked via slack slash commands. The command to use depends on what type of teammate behavior you'd like correct. See below for the available commands and sample usage.
 
 #### The Beard
 The following commands will invoke a reply with a https://rocketoff.appspot.com/oauth_complete/ reminding relevant members of the channel or DM that they are lame and should move on:
