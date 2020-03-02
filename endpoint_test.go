@@ -124,6 +124,43 @@ func TestShowEmThePointGodEndpoint(t *testing.T) {
 	})
 }
 
+func TestOAuthCompleteEndpoint(t *testing.T) {
+	t.Run("success", func(t *testing.T) {
+		mockSvc := new(mockService)
+		oauthCompleteReq := &oauthCompleteRequest{
+			code:    "code",
+		}
+		oauthOptions := &OAuthCompleteOptions{
+			Code:  oauthCompleteReq.code,
+		}
+		mockSvc.On("CompleteChatOAuth", oauthOptions).Return(redirectURI, nil)
+		endpoint := makeOAuthCompleteEndpoint(mockSvc)
+		response, err := endpoint(context.Background(), oauthCompleteReq)
+
+		if assert.NoError(t, err) && assert.NotNil(t, response){
+			redirect := response.(string)
+			assert.Equal(t, redirectURI, redirect)
+		}
+	})
+
+	t.Run("nil request", func(t *testing.T) {
+		mockSvc := new(mockService)
+		endpoint := makeOAuthCompleteEndpoint(mockSvc)
+		_, err := endpoint(context.Background(), nil)
+
+		assert.Equal(t, ErrInvalidType{"oauthCompleteRequest"}, err)
+	})
+
+	t.Run("400 response", func(t *testing.T) {
+		mockSvc := new(mockService)
+		endpoint := makeOAuthCompleteEndpoint(mockSvc)
+		oauthCompleteReq := &oauthCompleteRequest{}
+		_, err := endpoint(context.Background(), oauthCompleteReq)
+
+		assert.Equal(t, ErrInvalidValue{"code must be provided"}, err)
+	})
+}
+
 type mockService struct {
 	mock.Mock
 }
@@ -136,4 +173,9 @@ func (m *mockService) ShowEmTheBeard(_ context.Context, command *ImageCommand) e
 func (m *mockService) ShowEmThePointGod(_ context.Context, command *ImageCommand) error {
 	args := m.Called(command)
 	return args.Error(0)
+}
+
+func (m *mockService) CompleteChatOAuth(_ context.Context, options *OAuthCompleteOptions) (string, error) {
+	args := m.Called(options)
+	return args.Get(0).(string), args.Error(1)
 }

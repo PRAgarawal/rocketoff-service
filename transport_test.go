@@ -14,7 +14,7 @@ import (
 func TestMakeHTTPHandler(t *testing.T) {
 	e := Endpoints{}
 
-	result := MakeHTTPHandler(e, &mockCommandDecoder{})
+	result := MakeHTTPHandler(e, &mockCommandDecoder{}, "")
 	assert.Implements(t, (*http.Handler)(nil), result)
 }
 
