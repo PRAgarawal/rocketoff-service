@@ -15,10 +15,6 @@ import (
 	kitlog "github.com/go-kit/kit/log"
 )
 
-const (
-	slackOAuthURL = "https://slack.com/oauth/v2/authorize?client_id=%s&scope=chat:write,commands"
-)
-
 func main() {
 	var (
 		signingSecret      = flag.String("slack-signing-secret", os.Getenv("SLACK_SIGNING_SECRET"), "slack application signing secret to verify web requests")
@@ -47,8 +43,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	commandDecoder := slack.NewCommandDecoder(*signingSecret)
-	slackOAuthCompleteURL := fmt.Sprintf(slackOAuthURL, *clientID)
-	mux.Handle("/", rocketoff.MakeHTTPHandler(integrationEndpoints, commandDecoder, slackOAuthCompleteURL))
+	mux.Handle("/", rocketoff.MakeHTTPHandler(integrationEndpoints, commandDecoder))
 
 	server := &http.Server{Addr: ":8080", Handler: mux}
 	listenAndServeGracefully(server, logger)

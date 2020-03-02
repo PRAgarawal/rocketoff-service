@@ -3,7 +3,7 @@ Do you:
 - Love Houston Sports?
 - Enjoy watching top-tier athletes on repeat in top-tier reaction GIFs?
 - Have teammates with SERIOUS behavior issues?
-- Enjoy annoying people by wearing out once-great memes?
+- Enjoy annoying people by wearing out (two very specific) once-great memes?
 
 Then I have the chat application for you!
 

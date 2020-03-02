@@ -12,7 +12,7 @@ import (
 )
 
 // MakeHTTPHandler initializes all the available http routes
-func MakeHTTPHandler(e Endpoints, commandDecoder chat.CommandDecoder, oauthURL string) http.Handler {
+func MakeHTTPHandler(e Endpoints, commandDecoder chat.CommandDecoder) http.Handler {
 	router := mux.NewRouter()
 	opts := []kithttp.ServerOption{
 		kithttp.ServerErrorEncoder(encodeError),
