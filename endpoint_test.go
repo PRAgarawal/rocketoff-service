@@ -128,16 +128,16 @@ func TestOAuthCompleteEndpoint(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		mockSvc := new(mockService)
 		oauthCompleteReq := &oauthCompleteRequest{
-			code:    "code",
+			code: "code",
 		}
 		oauthOptions := &OAuthCompleteOptions{
-			Code:  oauthCompleteReq.code,
+			Code: oauthCompleteReq.code,
 		}
 		mockSvc.On("CompleteChatOAuth", oauthOptions).Return(redirectURI, nil)
 		endpoint := makeOAuthCompleteEndpoint(mockSvc)
 		response, err := endpoint(context.Background(), oauthCompleteReq)
 
-		if assert.NoError(t, err) && assert.NotNil(t, response){
+		if assert.NoError(t, err) && assert.NotNil(t, response) {
 			redirect := response.(string)
 			assert.Equal(t, redirectURI, redirect)
 		}
@@ -177,5 +177,10 @@ func (m *mockService) ShowEmThePointGod(_ context.Context, command *ImageCommand
 
 func (m *mockService) CompleteChatOAuth(_ context.Context, options *OAuthCompleteOptions) (string, error) {
 	args := m.Called(options)
+	return args.Get(0).(string), args.Error(1)
+}
+
+func (m *mockService) RedirectForOAuth(_ context.Context) (string, error) {
+	args := m.Called()
 	return args.Get(0).(string), args.Error(1)
 }

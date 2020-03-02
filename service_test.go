@@ -106,12 +106,27 @@ func TestCompleteChatOAuth(t *testing.T) {
 			OAuthCompleteRedirectURL: redirectURI,
 		}
 		svc := New(kitlog.NewNopLogger(), nil, config)
-		oauthOptions := &OAuthCompleteOptions{Code:  "code"}
+		oauthOptions := &OAuthCompleteOptions{Code: "code"}
 		redirect, err := svc.CompleteChatOAuth(context.Background(), oauthOptions)
 
 		assert.Nil(t, err)
 		assert.Equal(t, redirectURI, redirect)
 	})
+}
+
+func TestRedirectForOAuth(t *testing.T) {
+	config := &ChatConfig{
+		ClientID:                 "123",
+		AuthorizationEndpoint:    "https://authorize.me/",
+		OAuthRedirectURL:         "localhost/oauth_complete",
+		Scopes:                   "scope1,scope2",
+	}
+	svc := New(kitlog.NewNopLogger(), nil, config)
+	expectedURI := "https://authorize.me/?client_id=123&redirect_uri=localhost%2Foauth_complete&response_type=code&scope=scope1+scope2"
+	redirect, err := svc.RedirectForOAuth(context.Background())
+
+	assert.Equal(t, expectedURI, redirect)
+	assert.Nil(t, err)
 }
 
 func TestBuildRedirectURI(t *testing.T) {

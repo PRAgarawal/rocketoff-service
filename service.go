@@ -3,6 +3,7 @@ package rocketoff
 import (
 	"context"
 	"net/url"
+	"strings"
 
 	"github.com/PRAgarawal/rocketoff/chat"
 	kitlog "github.com/go-kit/kit/log"
@@ -24,6 +25,9 @@ type Service interface {
 
 	// CompleteChatOAuth takes the requesting user's authorization code an retrieves an access token. This process should complete the signup for the application, but we don't actually need the authorization token.
 	CompleteChatOAuth(ctx context.Context, oauthOptions *OAuthCompleteOptions) (string, error)
+
+	// RedirectForOAuth builds the oauth authentication URI that a chat app store may use to initiate the authentication process
+	RedirectForOAuth(_ context.Context) (string, error)
 }
 
 type ImageCommand struct {
@@ -46,8 +50,11 @@ type OAuthCompleteOptions struct {
 type ChatConfig struct {
 	ClientID                 string
 	ClientSecret             string
+	AuthorizationEndpoint    string
 	TokenEndpoint            string
+	OAuthRedirectURL         string
 	OAuthCompleteRedirectURL string
+	Scopes                   string
 }
 
 type Svc struct {
@@ -108,6 +115,12 @@ func (s *Svc) CompleteChatOAuth(ctx context.Context, oauthOptions *OAuthComplete
 	return buildRedirectURI(s.config.OAuthCompleteRedirectURL, err)
 }
 
+// RedirectForOAuth uses an oauth2 config to build and return the oauth authentication URI
+func (s *Svc) RedirectForOAuth(_ context.Context) (string, error) {
+	conf := s.OAuth2Config()
+	return conf.AuthCodeURL(""), nil
+}
+
 // buildRedirectURI takes a base redirect URI and will add an `error` query parameter in the return URI string if an err is provided
 func buildRedirectURI(redirectBaseURI string, err error) (string, error) {
 	if err == nil {
@@ -132,10 +145,13 @@ func buildRedirectURI(redirectBaseURI string, err error) (string, error) {
 func (s *Svc) OAuth2Config() *oauth2.Config {
 	conf := &oauth2.Config{}
 	conf.Endpoint = oauth2.Endpoint{
+		AuthURL:  s.config.AuthorizationEndpoint,
 		TokenURL: s.config.TokenEndpoint,
 	}
 	conf.ClientID = s.config.ClientID
 	conf.ClientSecret = s.config.ClientSecret
+	conf.RedirectURL = s.config.OAuthRedirectURL
+	conf.Scopes = strings.Split(s.config.Scopes, ",")
 
 	return conf
 }

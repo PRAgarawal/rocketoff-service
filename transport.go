@@ -40,7 +40,7 @@ func MakeHTTPHandler(e Endpoints, commandDecoder chat.CommandDecoder, oauthURL s
 		Handler(kithttp.NewServer(
 			e.OAuthComplete,
 			decodeOAuthCompleteRequest,
-			encodeOAuthCompleteResponse,
+			encodeRedirectResponse,
 			opts...,
 		))
 	router.Methods(http.MethodGet).Path("/oauth_complete/").
@@ -49,14 +49,13 @@ func MakeHTTPHandler(e Endpoints, commandDecoder chat.CommandDecoder, oauthURL s
 		Handler(kithttp.NewServer(
 			e.OAuthComplete,
 			decodeOAuthCompleteRequest,
-			encodeOAuthCompleteResponse,
+			encodeRedirectResponse,
 			opts...,
 		))
 
-	encodeRedirectResponse := makeRedirectEncoder(oauthURL)
 	router.Methods(http.MethodGet).Path("/redirect/").
 		Handler(kithttp.NewServer(
-			e.OAuthComplete,
+			e.OAuthRedirect,
 			decodeRedirectRequest,
 			encodeRedirectResponse,
 			opts...,
@@ -91,7 +90,7 @@ func decodeOAuthCompleteRequest(_ context.Context, request *http.Request) (inter
 	return &oauthCompleteRequest{vars["code"], vars["state"]}, nil
 }
 
-func encodeOAuthCompleteResponse(_ context.Context, writer http.ResponseWriter, resp interface{}) error {
+func encodeRedirectResponse(_ context.Context, writer http.ResponseWriter, resp interface{}) error {
 	if redirectURI, ok := resp.(string); ok {
 		writer.Header().Set("Location", redirectURI)
 		writer.WriteHeader(http.StatusFound)
@@ -103,14 +102,6 @@ func encodeOAuthCompleteResponse(_ context.Context, writer http.ResponseWriter, 
 
 func decodeRedirectRequest(_ context.Context, _ *http.Request) (interface{}, error) {
 	return nil, nil
-}
-
-func makeRedirectEncoder(oauthURL string) kithttp.EncodeResponseFunc {
-	return func(_ context.Context, writer http.ResponseWriter, _ interface{}) error {
-		writer.Header().Set("Location", oauthURL)
-		writer.WriteHeader(http.StatusFound)
-		return nil
-	}
 }
 
 func encodeError(_ context.Context, err error, w http.ResponseWriter) {

@@ -68,9 +68,9 @@ func makeOAuthCompleteEndpoint(svc Service) endpoint.Endpoint {
 	}
 }
 
-func makeOAuthRedirectEndpoint(_ Service) endpoint.Endpoint {
-	return func(_ context.Context, _ interface{}) (interface{}, error) {
-		return nil, nil
+func makeOAuthRedirectEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, _ interface{}) (interface{}, error) {
+		return svc.RedirectForOAuth(ctx)
 	}
 }
 

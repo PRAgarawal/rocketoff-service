@@ -16,25 +16,31 @@ import (
 )
 
 const (
-	// TODO build this URL in a service method... this is ugly
 	slackOAuthURL = "https://slack.com/oauth/v2/authorize?client_id=%s&scope=chat:write,commands"
 )
 
 func main() {
 	var (
-		signingSecret = flag.String("slack-signing-secret", os.Getenv("SLACK_SIGNING_SECRET"), "slack application signing secret to verify web requests")
-		clientID      = flag.String("client-id", os.Getenv("CLIENT_ID"), "application client ID for OAuth requests")
-		clientSecret  = flag.String("client-secret", os.Getenv("CLIENT_SECRET"), "application client secret for OAuth requests")
+		signingSecret      = flag.String("slack-signing-secret", os.Getenv("SLACK_SIGNING_SECRET"), "slack application signing secret to verify web requests")
+		clientID           = flag.String("client-id", os.Getenv("CLIENT_ID"), "application client ID for OAuth requests")
+		clientSecret       = flag.String("client-secret", os.Getenv("CLIENT_SECRET"), "application client secret for OAuth requests")
+		oauthAuthEndpoint  = flag.String("oauth-auth-endpoint", os.Getenv("OAUTH_AUTH_ENDPOINT"), "URL to send user to to authorize our app")
 		oauthTokenEndpoint = flag.String("oauth-token-endpoint", os.Getenv("OAUTH_TOKEN_ENDPOINT"), "URL to use to procure oauth2 access tokens")
-		oauthCompleteURL   = flag.String("oauth-redirect-url", os.Getenv("OAUTH_REDIRECT_URL"), "URL to take the user to after they have successfully signed up for the app")
+		oauthCompleteURL   = flag.String("oauth-complete-url", os.Getenv("OAUTH_COMPLETE_URL"), "URL to take the user to after they have successfully signed up for the app")
+		oauthRedirectURL   = flag.String("oauth-redirect-url", os.Getenv("OAUTH_REDIRECT_URL"), "localhost URL that the chat application will navigate the user's browser to upon granting the requested scopes")
+		oauthScopes        = flag.String("oauth-scopes", os.Getenv("OAUTH_SCOPES"), "The scopes our application is requesting from the chat service")
 		//TODO: Implement for keybase, and select the chat application via a flag?
 	)
+
 	logger := kitlog.With(kitlog.NewJSONLogger(os.Stderr), "ts", kitlog.DefaultTimestampUTC)
 	chatConfig := &rocketoff.ChatConfig{
 		ClientID:                 *clientID,
 		ClientSecret:             *clientSecret,
+		AuthorizationEndpoint:    *oauthAuthEndpoint,
 		TokenEndpoint:            *oauthTokenEndpoint,
 		OAuthCompleteRedirectURL: *oauthCompleteURL,
+		OAuthRedirectURL:         *oauthRedirectURL,
+		Scopes:                   *oauthScopes,
 	}
 	rocketoffService := rocketoff.New(logger, slack.NewMessenger(), chatConfig)
 	integrationEndpoints := rocketoff.MakeServerEndpoints(rocketoffService)
