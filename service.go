@@ -2,9 +2,11 @@ package rocketoff
 
 import (
 	"context"
+	"net/url"
 
 	"github.com/PRAgarawal/rocketoff/chat"
 	kitlog "github.com/go-kit/kit/log"
+	"golang.org/x/oauth2"
 )
 
 const (
@@ -19,6 +21,9 @@ type Service interface {
 
 	// ShowEmThePointGod will reply with a gif of Chris Paul, reminding those in the chat that they are not funny. Not all of them. They will know who they are.
 	ShowEmThePointGod(ctx context.Context, command *ImageCommand) error
+
+	// CompleteChatOAuth takes the requesting user's authorization code an retrieves an access token. This process should complete the signup for the application, but we don't actually need the authorization token.
+	CompleteChatOAuth(ctx context.Context, oauthOptions *OAuthCompleteOptions) (string, error)
 }
 
 type ImageCommand struct {
@@ -29,15 +34,33 @@ type ImageCommand struct {
 	RequestingUserID string
 }
 
+// OAuthCompleteOptions contains the values provided by the external OAuth2 authorization server that we will use to complete authentication of the corresponding integration, and procure the user's OAuth2 tokens.
+type OAuthCompleteOptions struct {
+	// Code is the OAuth2 authorization code from the authorization server. Rocketoff will use this value to collect the access and refresh tokens for the given integration
+	Code string
+
+	// State corresponds to the CSRFState value on the integration, and it's not very important for the purposes of this application
+	State string
+}
+
+type ChatConfig struct {
+	ClientID                 string
+	ClientSecret             string
+	TokenEndpoint            string
+	OAuthCompleteRedirectURL string
+}
+
 type Svc struct {
 	logger kitlog.Logger
 	msgr   chat.Messenger
+	config *ChatConfig
 }
 
-func New(logger kitlog.Logger, msgr chat.Messenger) Service {
+func New(logger kitlog.Logger, msgr chat.Messenger, config *ChatConfig) Service {
 	return &Svc{
 		logger: logger,
 		msgr:   msgr,
+		config: config,
 	}
 }
 
@@ -75,4 +98,44 @@ func (s *Svc) ShowEmThePointGod(_ context.Context, command *ImageCommand) error 
 	)
 
 	return nil
+}
+
+// CompleteChatOauth performs the actual token exchange to get the [useless for now] tokens
+func (s *Svc) CompleteChatOAuth(ctx context.Context, oauthOptions *OAuthCompleteOptions) (string, error) {
+	conf := s.OAuth2Config()
+	// We don't actually need the token to use webhook URLs to post messages
+	_, err := conf.Exchange(ctx, oauthOptions.Code)
+	return buildRedirectURI(s.config.OAuthCompleteRedirectURL, err)
+}
+
+// buildRedirectURI takes a base redirect URI and will add an `error` query parameter in the return URI string if an err is provided
+func buildRedirectURI(redirectBaseURI string, err error) (string, error) {
+	if err == nil {
+		return redirectBaseURI, nil
+	}
+
+	// There was an error, so add it to the redirect URI
+	redirectURL, parseErr := url.Parse(redirectBaseURI)
+	if parseErr != nil {
+		return "", parseErr
+	}
+	query, parseErr := url.ParseQuery(redirectURL.RawQuery)
+	if parseErr != nil {
+		return "", parseErr
+	}
+	query.Add("error", err.Error())
+	redirectURL.RawQuery = query.Encode()
+
+	return redirectURL.String(), nil
+}
+
+func (s *Svc) OAuth2Config() *oauth2.Config {
+	conf := &oauth2.Config{}
+	conf.Endpoint = oauth2.Endpoint{
+		TokenURL: s.config.TokenEndpoint,
+	}
+	conf.ClientID = s.config.ClientID
+	conf.ClientSecret = s.config.ClientSecret
+
+	return conf
 }

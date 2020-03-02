@@ -3,6 +3,7 @@ package rocketoff
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/PRAgarawal/rocketoff/chat"
@@ -32,12 +33,32 @@ func MakeHTTPHandler(e Endpoints, commandDecoder chat.CommandDecoder, oauthURL s
 			opts...,
 		))
 
-	encodeOAuthCompleteResponse := makeOAuthCompleteResponseEncoder(oauthURL)
 	router.Methods(http.MethodGet).Path("/oauth_complete/").
+		Queries(
+			"state", "{state:[0-9a-zA-Z\\W]+|}",
+			"code", "{code:[0-9a-zA-Z\\W]+|}").
 		Handler(kithttp.NewServer(
 			e.OAuthComplete,
 			decodeOAuthCompleteRequest,
 			encodeOAuthCompleteResponse,
+			opts...,
+		))
+	router.Methods(http.MethodGet).Path("/oauth_complete/").
+		Queries(
+			"code", "{code:[0-9a-zA-Z\\W]+|}").
+		Handler(kithttp.NewServer(
+			e.OAuthComplete,
+			decodeOAuthCompleteRequest,
+			encodeOAuthCompleteResponse,
+			opts...,
+		))
+
+	encodeRedirectResponse := makeRedirectEncoder(oauthURL)
+	router.Methods(http.MethodGet).Path("/redirect/").
+		Handler(kithttp.NewServer(
+			e.OAuthComplete,
+			decodeRedirectRequest,
+			encodeRedirectResponse,
 			opts...,
 		))
 
@@ -62,11 +83,29 @@ func encodeResponse(_ context.Context, _ http.ResponseWriter, _ interface{}) err
 	return nil
 }
 
-func decodeOAuthCompleteRequest(_ context.Context, _ *http.Request) (interface{}, error) {
+func decodeOAuthCompleteRequest(_ context.Context, request *http.Request) (interface{}, error) {
+	vars := mux.Vars(request)
+	if vars == nil {
+		return nil, fmt.Errorf("invalid or missing query params on oauth redirect")
+	}
+	return &oauthCompleteRequest{vars["code"], vars["state"]}, nil
+}
+
+func encodeOAuthCompleteResponse(_ context.Context, writer http.ResponseWriter, resp interface{}) error {
+	if redirectURI, ok := resp.(string); ok {
+		writer.Header().Set("Location", redirectURI)
+		writer.WriteHeader(http.StatusFound)
+		return nil
+	}
+
+	return fmt.Errorf("no redirect URI found")
+}
+
+func decodeRedirectRequest(_ context.Context, _ *http.Request) (interface{}, error) {
 	return nil, nil
 }
 
-func makeOAuthCompleteResponseEncoder(oauthURL string) kithttp.EncodeResponseFunc {
+func makeRedirectEncoder(oauthURL string) kithttp.EncodeResponseFunc {
 	return func(_ context.Context, writer http.ResponseWriter, _ interface{}) error {
 		writer.Header().Set("Location", oauthURL)
 		writer.WriteHeader(http.StatusFound)

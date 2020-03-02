@@ -10,6 +10,7 @@ type Endpoints struct {
 	ShowEmThePointGod endpoint.Endpoint
 	ShowEmTheBeard    endpoint.Endpoint
 	OAuthComplete     endpoint.Endpoint
+	OAuthRedirect     endpoint.Endpoint
 }
 
 // MakeServerEndpoints initializes the endpoints for the service
@@ -18,6 +19,7 @@ func MakeServerEndpoints(s Service) Endpoints {
 		ShowEmTheBeard:    makeShowEmTheBeardEndpoint(s),
 		ShowEmThePointGod: makeShowEmThePointGodEndpoint(s),
 		OAuthComplete:     makeOAuthCompleteEndpoint(s),
+		OAuthRedirect:     makeOAuthRedirectEndpoint(s),
 	}
 }
 
@@ -47,7 +49,26 @@ func makeShowEmThePointGodEndpoint(svc Service) endpoint.Endpoint {
 	}
 }
 
-func makeOAuthCompleteEndpoint(_ Service) endpoint.Endpoint {
+func makeOAuthCompleteEndpoint(svc Service) endpoint.Endpoint {
+	return func(ctx context.Context, request interface{}) (interface{}, error) {
+		req, ok := request.(*oauthCompleteRequest)
+		if !ok {
+			return nil, ErrInvalidType{"oauthCompleteRequest"}
+		}
+
+		oauthOptions := &OAuthCompleteOptions{
+			Code:  req.code,
+			State: req.state,
+		}
+		if oauthOptions.Code == "" {
+			return nil, ErrInvalidValue{"code must be provided"}
+		}
+
+		return svc.CompleteChatOAuth(ctx, oauthOptions)
+	}
+}
+
+func makeOAuthRedirectEndpoint(_ Service) endpoint.Endpoint {
 	return func(_ context.Context, _ interface{}) (interface{}, error) {
 		return nil, nil
 	}
@@ -56,4 +77,9 @@ func makeOAuthCompleteEndpoint(_ Service) endpoint.Endpoint {
 type commandRequest struct {
 	webhookURL       string
 	requestingUserID string
+}
+
+type oauthCompleteRequest struct {
+	code  string
+	state string
 }
