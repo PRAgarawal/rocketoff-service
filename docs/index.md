@@ -19,7 +19,7 @@ The following commands will will invoke a reply with a https://rocketoff.appspot
 ![](https://i.imgur.com/EeLpHJr.gif)
 
 ### Get started!
-Some organizations have shown proper use of these commands to increase productivity by as much as 47% within six months*.
+Some organizations have shown proper use of these commands to increase productivity by as much as 47% in six months or less!*
 
 So what are you waiting for? Install the app today!
 
